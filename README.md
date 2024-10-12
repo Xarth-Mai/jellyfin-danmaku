@@ -68,13 +68,13 @@ sub_filter '</body>' '<script src="https://jellyfin-danmaku.pages.dev/ede.user.j
 sub_filter_once on;
 ```
 
-並加入新的 location 塊:
+若需要本地代理弹弹play API，不使用CF Worker代理，则加入新的 location 块，否则删除上面网址中的`?noCors=1`:
 ```conf
 location /ddplay-api/ {
     proxy_pass https://api.dandanplay.net;
     proxy_set_header Host $host;
 
-    # 下傳的頭部設置
+    # example.com 根据自己的域名设置，或直接设为*
     add_header Access-Control-Allow-Origin "example.com";
     add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
     add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
@@ -85,7 +85,7 @@ location /ddplay-api/api/v2/login {
     proxy_pass https://ddplay-api.930524.xyz;
     proxy_set_header Host $host;
 
-    # 下傳的頭部設置
+    # example.com 根据自己的域名设置，或直接设为*
     add_header Access-Control-Allow-Origin "example.com";
     add_header Access-Control-Allow-Methods "POST, OPTIONS";
     add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
@@ -116,6 +116,7 @@ example.com {
         header_up Accept-Encoding identity
     }
 
+    # 若需要本地代理弹弹play API，不使用CF Worker代理，则加入下面两个handle_path，否则删除上面网址中的 ?noCors=1
     handle_path /ddplay-api/* {
         reverse_proxy https://api.dandanplay.net {
             header_up Host {upstream_hostport}

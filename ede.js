@@ -166,7 +166,7 @@
                             <input style="width: 50%;" type="range" id="fontSize" min="8" max="80" step="1" value="${window.ede.fontSize || 18}" />
                         </div>
                         <div style="display: flex;">
-                            <label style="flex: auto;">其他字体选項:</label>
+                            <label style="flex: auto;">其他字体选项:</label>
                             <div><input style="flex-grow: 1;" id="danmakuFontOptions" placeholder="" value="${window.ede.fontOptions ?? ""}" /></div>
                         </div>
                         <div style="display: flex;">
@@ -292,7 +292,7 @@
                     showDebugInfo(`字体：${window.ede.fontFamily}`);
                     window.ede.fontOptions = document.getElementById("danmakuFontOptions").value;
                     window.localStorage.setItem('danmakuFontOptions', window.ede.fontOptions);
-                    showDebugInfo(`字体选項：${window.ede.fontOptions}`);
+                    showDebugInfo(`字体选项：${window.ede.fontOptions}`);
                     reloadDanmaku('reload');
                     closeModal();
                 } catch (e) {
@@ -494,10 +494,10 @@
             // 当前剧集弹幕偏移时间
             this.curEpOffset = 0;
             this.curEpOffsetModified = false;
-            // 字體
+            // 字体
             const fontFamily = window.localStorage.getItem('danmakuFontFamily');
             this.fontFamily = fontFamily ?? "sans-serif";
-            // 字体选項
+            // 字体选项
             const fontOptions = window.localStorage.getItem('danmakuFontOptions');
             this.fontOptions = fontOptions ?? "";
 
@@ -1165,7 +1165,7 @@
         showDebugInfo(`弹幕模式过滤：${window.ede.danmakuModeFilter}`);
         showDebugInfo(`弹幕字号：${window.ede.fontSize}`);
         showDebugInfo(`弹幕字体：${window.ede.fontFamily}`);
-        showDebugInfo(`弹幕字体选項：${window.ede.fontOptions}`);
+        showDebugInfo(`弹幕字体选项：${window.ede.fontOptions}`);
         showDebugInfo(`屏幕分辨率：${window.screen.width}x${window.screen.height}`);
         if (window.ede.curEpOffset !== 0) showDebugInfo(`当前弹幕偏移：${window.ede.curEpOffset} 秒`);
 
