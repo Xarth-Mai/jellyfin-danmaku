@@ -53,6 +53,7 @@
     const mediaContainerQueryStr = "div[data-type='video-osd']";
     const mediaQueryStr = 'video';
 
+    let isNewJellyfin = true;
     let itemId = '';
 
     // Intercept XMLHttpRequest
@@ -850,8 +851,20 @@
         let playingInfo = null;
         while (!playingInfo) {
             await new Promise((resolve) => setTimeout(resolve, 200));
-            // params: userId, itemId
-            playingInfo = await ApiClient.getItem("", itemId);
+            if (isNewJellyfin) {
+                // params: userId, itemId
+                playingInfo = await ApiClient.getItem(ApiClient.getCurrentUserId(), itemId);
+            } else {
+                let sessionInfo = await ApiClient.getSessions({
+                    userId: ApiClient.getCurrentUserId(),
+                    deviceId: ApiClient.deviceId(),
+                });
+                if (!sessionInfo[0].NowPlayingItem) {
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                    continue;
+                }
+                playingInfo = sessionInfo[0].NowPlayingItem;
+            }
         }
         showDebugInfo('获取Item信息成功: ' + (playingInfo.SeriesName || playingInfo.Name));
         return playingInfo;
@@ -1498,12 +1511,29 @@
         });
     };
 
+    const compareVersions = (version1, version2) => {
+        if (typeof version1 !== 'string') return -1;
+        if (typeof version2 !== 'string') return 1;
+        const v1 = version1.split('.').map(Number);
+        const v2 = version2.split('.').map(Number);
+        
+        for (let i = 0; i < Math.max(v1.length, v2.length); i++) {
+            const n1 = v1[i] || 0;
+            const n2 = v2[i] || 0;
+        
+            if (n1 > n2) return 1;
+            if (n1 < n2) return -1;
+        }
+        
+        return 0;
+    }
+
     waitForElement('.htmlvideoplayer').then(() => {
         if (!window.ede) {
             window.ede = new EDE();
 
-            var materialIcon = document.querySelector('.material-icons');
-            var fontFamily = window.getComputedStyle(materialIcon).fontFamily;
+            const materialIcon = document.querySelector('.material-icons');
+            const fontFamily = window.getComputedStyle(materialIcon).fontFamily;
             if (fontFamily === '"Font Awesome 6 Pro"') {
                 danmaku_icons = ['fa-comment-slash', 'fa-comment'];
                 log_icons = ['fa-toilet-paper-slash', 'fa-toilet-paper'];
@@ -1514,12 +1544,20 @@
             }
 
             (async () => {
-                let retry = 0;
-                while (!itemId) {
-                    await new Promise((resolve) => setTimeout(resolve, 200));
-                    retry++;
-                    if (retry > 10) {
-                        throw new Error('获取itemId失败');
+                isNewJellyfin = compareVersions(ApiClient?._appVersion, '10.10.0') >= 0;
+                // showDebugInfo(`isNewJellyfin: ${isNewJellyfin}`);
+                if (isNewJellyfin) {
+                    let retry = 0;
+                    while (!itemId) {
+                        await new Promise((resolve) => setTimeout(resolve, 200));
+                        retry++;
+                        if (retry > 10) {
+                            throw new Error('获取itemId失败');
+                        }
+                    }
+                } else {
+                    while (!(await ApiClient.getSessions())) {
+                        await new Promise((resolve) => setTimeout(resolve, 200));
                     }
                 }
 
