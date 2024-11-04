@@ -3,7 +3,7 @@
 // @description  Jellyfin弹幕插件
 // @namespace    https://github.com/RyoLee
 // @author       RyoLee
-// @version      1.50
+// @version      1.51
 // @copyright    2022, RyoLee (https://github.com/RyoLee)
 // @license      MIT; https://raw.githubusercontent.com/Izumiko/jellyfin-danmaku/jellyfin/LICENSE
 // @icon         https://github.githubassets.com/pinned-octocat.svg
@@ -881,7 +881,10 @@
                         "Accept": "application/json"
                     },
                     onload: function (response) {
-                        resolve(response.responseText);
+                        response.json = () => Promise.resolve(JSON.parse(response.responseText));
+                        response.text = () => Promise.resolve(response.responseText);
+                        response.ok = response.status >= 200 && response.status < 300;
+                        resolve(response);
                     },
                     onerror: function (error) {
                         reject(error);
@@ -946,7 +949,7 @@
 
         let searchUrl = apiPrefix + '/api/v2/search/episodes?anime=' + animeName + '&withRelated=true';
         let animaInfo = await makeGetRequest(searchUrl)
-            .then((response) => isInTampermonkey ? JSON.parse(response) : response.json())
+            .then((response) => response.json())
             .catch((error) => {
                 showDebugInfo('查询失败:', error);
                 return null;
@@ -957,7 +960,7 @@
             if (animeName?.length > 0) {
                 searchUrl = apiPrefix + '/api/v2/search/episodes?anime=' + animeName + '&withRelated=true';
                 animaInfo = await makeGetRequest(searchUrl)
-                    .then((response) => isInTampermonkey ? JSON.parse(response) : response.json())
+                    .then((response) => response.json())
                     .catch((error) => {
                         showDebugInfo('查询失败:', error);
                         return null;
@@ -1021,7 +1024,7 @@
         const url_ext = apiPrefix + '/api/v2/extcomment?url=';
         try {
             let response = await makeGetRequest(url_all);
-            let data = isInTampermonkey ? JSON.parse(response) : await response.json();
+            let data = await response.json();
             const matchBili = /^\[BiliBili\]/;
             let hasBili = false;
             if ((danmakuFilter & 1) !== 1) {
@@ -1034,7 +1037,7 @@
             }
             let comments = data.comments;
             response = await makeGetRequest(url_related);
-            data = isInTampermonkey ? JSON.parse(response) : await response.json();
+            data = await response.json();
             showDebugInfo('第三方弹幕源个数：' + data.relateds.length);
 
             if (data.relateds.length > 0) {
@@ -1057,7 +1060,7 @@
                 // 获取第三方弹幕
                 await Promise.all(src.map(async (s) => {
                     const response = await makeGetRequest(url_ext + encodeURIComponent(s));
-                    const data = isInTampermonkey ? JSON.parse(response) : await response.json();
+                    const data = await response.json();
                     comments = comments.concat(data.comments);
                 }));
             }
@@ -1075,7 +1078,7 @@
         for (let i = 0; i < 2; i++) {
             try {
                 const response = await makeGetRequest(url);
-                const data = isInTampermonkey ? JSON.parse(response) : await response.json();
+                const data = await response.json();
                 showDebugInfo('弹幕下载成功: ' + data.comments.length);
                 return data.comments;
             } catch (error) {
@@ -1096,7 +1099,7 @@
     async function getCommentsByPluginApi(jellyfinItemId) {
         const path = window.location.pathname.replace(/\/web\/(index\.html)?/, '/api/danmu/');
         const url = window.location.origin + path + jellyfinItemId + '/raw';
-        const response = await makeGetRequest(url);
+        const response = await fetch(url);
         if (!response.ok) {
             return null;
         }
