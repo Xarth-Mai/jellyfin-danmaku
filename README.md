@@ -180,6 +180,8 @@ ExecStartPre=-/usr/bin/sed -i 's#</div></body>#</div><script src="https://jellyf
 
 ### 4. 修改服务端
 
+**可使用[@yomunsam](https://github.com/yomunsam)提供的自动化修改插件[yomunsam/Jellyfin.WebDanmakuStarter](https://github.com/yomunsam/Jellyfin.WebDanmakuStarter)，或者按照下面的方法手动修改。**
+
 修改文件 `/usr/share/jellyfin/web/index.html`
 *(Default)*
 
