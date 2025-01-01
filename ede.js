@@ -252,9 +252,6 @@
 
     class EDE {
         constructor() {
-            // 简繁转换 0:不转换 1:简体 2:繁体
-            const chConvert = window.localStorage.getItem('chConvert');
-            this.chConvert = chConvert ? parseInt(chConvert) : 0;
             // 开关弹幕 0:关闭 1:打开
             const danmakuSwitch = window.localStorage.getItem('danmakuSwitch');
             this.danmakuSwitch = danmakuSwitch ? parseInt(danmakuSwitch) : 1;
@@ -568,7 +565,7 @@
 
     async function getComments(episodeId) {
         const {danmakuFilter} = window.ede;
-        const url_all = apiPrefix + '/api/v2/comment/' + episodeId + '?withRelated=true&chConvert=' + window.ede.chConvert;
+        const url_all = apiPrefix + '/api/v2/comment/' + episodeId + '?withRelated=true'
         const url_related = apiPrefix + '/api/v2/related/' + episodeId;
         const url_ext = apiPrefix + '/api/v2/extcomment?url=';
         try {
